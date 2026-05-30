@@ -17,13 +17,16 @@ const login = async (req, res) => {
 
         const payload = {
             id: user.id,
-            name: user.name
-        }
-        
+            name: user.name,
+            role: user.role
+        };
+
         const token = generateToken(payload);
-        res.json({ token, 
-            user : { id: user.id, name: user.name }, 
-            message: "successfully logged in" });
+        res.json({
+            token,
+            user: { id: user.id, name: user.name, role: user.role },
+            message: "successfully logged in"
+        });
 
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -68,12 +71,23 @@ const signup = async (req, res) => {
 
 const getProfileData = async (req, res) => {
     try {
-        const result = await findById(req.user.id);
+        const user = await findById(req.user.id);
 
-        if (!result) {
+        if (!user) {
             return res.status(404).json({ error: "user does not exist" });
         }
-        res.json(result);
+
+        res.json({
+            id: user.id,
+            name: user.name,
+            age: user.age,
+            email: user.email,
+            mobile: user.mobile,
+            address: user.address,
+            role: user.role,
+            aadharCardNumber: user.aadhar_card_number,
+            isVoted: Boolean(user.is_voted)
+        });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -97,12 +111,7 @@ const updatePass = async (req, res) => {
 const getAllCandidates = async (req, res) => {
     try {
         const result = await getCandidate();
-
-        if (!result) {
-            return res.status(404).json({ error: "No candidates found" });
-        }
-        console.log(result)
-        res.json(result);
+        res.json(result || []);
     } catch (error) {
         res.status(500).json({ error: error.message });
     }

@@ -36,7 +36,7 @@ const checkIsAdmin = async (req, res, next) => {
     try {
         const result = await isAdmin(req.user.id);
         if (!result) {
-            return res.status(401).json({ message: "unauthorized this aadhar number person is not an admin " })
+            return res.status(403).json({ error: "Admin access required" });
         }
         console.log("Admin", result, "Verified")
         next()

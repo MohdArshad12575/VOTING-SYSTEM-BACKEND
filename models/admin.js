@@ -1,10 +1,10 @@
 import pool from '../db.js';
 
 const createCandidate = async (candidateData) => {
-    const { name, party, age } = candidateData;
+    const { name, party, age, image_url } = candidateData;
     const [result] = await pool.query(
-        `INSERT INTO candidates (name, party, age) VALUES (?, ?, ?)`,
-        [name, party, age]
+        `INSERT INTO candidates (name, party, age, image_url) VALUES (?, ?, ?, ?)`,
+        [name, party, age, image_url || null]
     );
     return result.insertId;
 };
@@ -25,16 +25,20 @@ const updateCandidate = async (candidateData, id) => {
         updates.push("age = ?");
         values.push(candidateData.age);
     }
-
-    if (updates.length === 0) {
-        return null; 
+    if (candidateData.image_url !== undefined) {
+        updates.push("image_url = ?");
+        values.push(candidateData.image_url || null);
     }
 
-    values.push(id); 
+    if (updates.length === 0) {
+        return null;
+    }
+
+    values.push(id);
 
     const query = `UPDATE candidates SET ${updates.join(", ")} WHERE id = ?`;
     const [result] = await pool.query(query, values);
-    
+
     return result;
 };
 
@@ -45,7 +49,6 @@ const deleteCandidate = async (id) => {
     );
     return result;
 };
-
 
 const getAllCandidates = async () => {
     const [rows] = await pool.query(`SELECT * FROM candidates`);
@@ -70,9 +73,9 @@ const castVote = async (candidateId, userId) => {
 
 const getVoteCount = async () => {
     const [rows] = await pool.query(
-        `SELECT name, party, vote_count FROM candidates ORDER BY vote_count DESC`
+        `SELECT name, party, vote_count, image_url FROM candidates ORDER BY vote_count DESC`
     );
     return rows;
 };
 
-export { createCandidate, getAllCandidates, findById, castVote, getVoteCount, updateCandidate , deleteCandidate };
+export { createCandidate, getAllCandidates, findById, castVote, getVoteCount, updateCandidate, deleteCandidate };
